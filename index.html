@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Savitri Bank Analyzer Pro</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <style>
+        /* ================= PREMIUM MODERN CYBER-TECH CORE STYLES ================= */
+        :root {
+            --bg-main: #0B0F19;
+            --bg-card: #111827;
+            --bg-input: #1F2937;
+            --text-main: #F9FAFB;
+            --text-muted: #9CA3AF;
+            --accent-primary: #6366F1; /* Glow Indigo */
+            --accent-purple: #A855F7;  /* Tech Violet */
+            --accent-green: #10B981;   /* Cyber Emerald */
+            --accent-red: #EF4444;     /* Neon Crimson */
+            --border-color: #374151;
+            --glow-shadow: 0 0 20px rgba(99, 102, 241, 0.15);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            padding-bottom: 40px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Smooth Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-primary); }
+
+        /* Modern Glowing Header */
+        .premium-navbar {
+            background: rgba(17, 24, 39, 0.75);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo-section { display: flex; align-items: center; gap: 10px; }
+        .logo-badge { background: linear-gradient(135deg, var(--accent-primary), var(--accent-purple)); color: white; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 14px; letter-spacing: 1px; box-shadow: var(--glow-shadow); }
+        .logo-title h1 { margin: 0; font-size: 16px; font-weight: 600; color: var(--text-main); }
+        .logo-title p { margin: 2px 0 0; font-size: 11px; color: var(--text-muted); }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 24px 16px; animation: fadeInUp 0.5s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Premium Floating Cards */
+        .glass-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .glass-card:hover { border-color: #4B5563; }
+
+        .section-step { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+        .step-number { background: #1E1B4B; color: #A5B4FC; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; border: 1px solid #3730A3; }
+        .step-title { font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-muted); }
+
+        /* Modern Drag & Drop Zone */
+        .file-dropzone {
+            border: 2px dashed var(--border-color);
+            background: rgba(31, 41, 55, 0.3);
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .file-dropzone:hover { border-color: var(--accent-primary); background: rgba(99, 102, 241, 0.05); }
+        .file-dropzone input[type="file"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
+        .dropzone-icon { font-size: 32px; color: var(--accent-primary); margin-bottom: 10px; display: inline-block; }
+        
+        /* Form Inputs Redesign */
+        .modern-row { display: flex; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
+        .input-block { flex: 1; min-width: 140px; }
+        .input-block label { display: block; font-size: 12px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; }
+        .input-block input, .input-block select {
+            width: 100%; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; color: var(--text-main); font-size: 14px; box-sizing: border-box; outline: none; transition: all 0.3s ease;
+        }
+        .input-block input:focus, .input-block select:focus { border-color: var(--accent-primary); box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2); }
+
+        /* Premium Buttons */
+        .btn-cyber {
+            width: 100%; background: linear-gradient(135deg, var(--accent-primary), var(--accent-purple)); color: white; border: none; padding: 14px; font-size: 15px; font-weight: 600; border-radius: 12px; cursor: pointer; box-shadow: var(--glow-shadow); transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-cyber:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-sync { background: linear-gradient(135deg, #059669, var(--accent-green)); }
+
+        /* Data Visualization & Summary Layout */
+        .glow-summary { background: linear-gradient(180deg, #1E1B4B 0%, var(--bg-card) 100%); border: 1px solid #312E81; border-radius: 14px; padding: 24px; text-align: center; margin-bottom: 20px; }
+        .summary-val { font-size: 36px; font-weight: 800; background: linear-gradient(to right, #A5B4FC, #F3E8FF); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-top: 5px; font-family: monospace, sans-serif; }
+
+        /* Data Grid Table Redesign */
+        .table-container { overflow-x: auto; max-height: 280px; border: 1px solid var(--border-color); border-radius: 12px; background: rgba(17, 24, 39, 0.5); }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        th { background: #1F2937; color: var(--text-muted); padding: 12px; font-weight: 600; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; position: sticky; top: 0; }
+        td { padding: 12px; border-bottom: 1px solid var(--border-color); color: #E5E7EB; }
+        tr.matched-row-ui { background: rgba(99, 102, 241, 0.04); transition: background 0.2s ease; }
+        tr.matched-row-ui:hover { background: rgba(99, 102, 241, 0.08); }
+    </style>
+</head>
+<body>
+
+    <div class="premium-navbar">
+        <div class="logo-section">
+            <div class="logo-badge">AI</div>
+            <div class="logo-title">
+                <h1>Savitri Bank Analyzer</h1>
+                <p>Reconciliation Engine v2.0</p>
+            </div>
+        </div>
+    </div><div class="container">
+        
+        <!-- STEP 1 & 2: DATA SOURCE & MAPPING -->
+        <div class="glass-card">
+            <div class="section-step">
+                <div class="step-number">1</div>
+                <div class="step-title">Data Source & Mapping</div>
+            </div>
+            
+            <!-- Modern Drag & Drop Zone -->
+            <div class="file-dropzone" id="dropzoneArea">
+                <span class="dropzone-icon">📄</span>
+                <h3 style="margin:0; font-size:15px; color:var(--text-main);">Upload Bank Statement</h3>
+                <p style="margin:5px 0 0 0; font-size:12px; color:var(--text-muted);">Click or drag CSV / Excel file here</p>
+                <input type="file" id="bankFile" accept=".csv, .xls, .xlsx" onchange="updateFileName(this)">
+                <div id="fileNameDisplay" style="margin-top:10px; font-size:13px; color:var(--accent-green); font-weight:600;"></div>
+            </div>
+
+            <!-- Column Configuration -->
+            <div style="background: rgba(31, 41, 55, 0.4); padding: 12px; border-radius: 8px; margin-top: 20px; font-size: 12px; color: #D1D5DB; border: 1px solid #374151;">
+                <strong style="color:var(--accent-primary);">⚡ Smart Config:</strong> Verify the column numbers from your bank's Excel file.
+            </div>
+            
+            <div class="modern-row">
+                <div class="input-block">
+                    <label>Date Column No.</label>
+                    <input type="number" id="colDate" placeholder="e.g. 1" value="1">
+                </div>
+                <div class="input-block">
+                    <label>Narration (Details) No.</label>
+                    <input type="number" id="colDesc" placeholder="e.g. 2" value="2">
+                </div>
+                <div class="input-block">
+                    <label>Debit (Amount) No.</label>
+                    <input type="number" id="colDebit" placeholder="e.g. 4" value="4">
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 3: SEARCH & EXTRACTION -->
+        <div class="glass-card">
+            <div class="section-step">
+                <div class="step-number">2</div>
+                <div class="step-title">Extraction Parameters</div>
+            </div>
+            
+            <div class="input-block" style="margin-bottom: 16px;">
+                <label>Target Keyword (Dealer Name or UPI)</label>
+                <input type="text" id="searchKeyword" placeholder="e.g. SAMSUNG or UPI/RAMESH">
+            </div>
+            
+            <div class="modern-row" style="margin-bottom: 20px;">
+                <div class="input-block">
+                    <label>Start Date (Optional)</label>
+                    <input type="date" id="startDate">
+                </div>
+                <div class="input-block">
+                    <label>End Date (Optional)</label>
+                    <input type="date" id="endDate">
+                </div>
+            </div>
+            
+            <button class="btn-cyber" onclick="analyzeStatement()">
+                <span style="font-size:18px;">⚡</span> Run AI Extraction
+            </button>
+        </div>
+
+        <!-- STEP 4: RESULTS & ERP SYNC (Hidden by Default) -->
+        <div id="resultSection" style="display: none; animation: fadeInUp 0.5s ease;">
+            
+            <div class="glass-card" style="border-color: var(--accent-primary);">
+                <div class="section-step">
+                    <div class="step-number" style="background:#312E81; border-color:var(--accent-primary);">3</div>
+                    <div class="step-title" style="color:#A5B4FC;">Analysis Result & Sync</div>
+                </div>
+
+                <!-- Glow Summary Box -->
+                <div class="glow-summary">
+                    <div style="font-size: 13px; color: var(--text-muted); text-transform:uppercase; letter-spacing:1px;">Total Amount Extracted</div>
+                    <div class="summary-val" id="totalFound">₹0</div>
+                    <div style="font-size: 12px; margin-top: 8px; color: var(--accent-green);" id="recordCountText">Found 0 matching transactions</div>
+                </div>
+
+                <!-- Modern Data Grid -->
+                <div class="table-container" style="margin-bottom: 24px;">
+                    <table id="matchTable">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Narration</th>
+                                <th style="text-align:right;">Amount (₹)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="matchTableBody">
+                            <!-- Data will inject here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ERP Sync Section -->
+                <div style="border-top: 1px dashed var(--border-color); padding-top: 20px;">
+                    <div class="input-block" style="margin-bottom: 16px;">
+                        <label style="color:var(--text-main);">Select Target Dealer in ERP</label>
+                        <select id="erpDealerSelect">
+                            <option value="" disabled selected>Connecting to ERP database...</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn-cyber btn-sync" id="btnSync" onclick="syncToKhata()">
+                        <span style="font-size:18px;">☁️</span> Secure Sync to Ledger
+                    </button>
+                </div>
+            </div>
+
+        </div> <!-- End Result Section -->
+    </div> <!-- End Container --><!-- JAVASCRIPT: Firebase & Advanced Bank AI Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc } 
+        from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // Connecting to the SAME Savitri ERP Database
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3hc6Rz1gHZq8c71AHp5NSw8eSZT2-Mik",
+            authDomain: "savitri-job-bridge.firebaseapp.com",
+            projectId: "savitri-job-bridge",
+            storageBucket: "savitri-job-bridge.firebasestorage.app",
+            messagingSenderId: "721066136910",
+            appId: "1:721066136910:web:61b5d58b31d8ab481f7a1f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ================= UI INTERACTION =================
+        window.updateFileName = function(input) {
+            const display = document.getElementById('fileNameDisplay');
+            if(input.files && input.files.length > 0) {
+                display.innerText = "📁 Selected: " + input.files[0].name;
+                document.getElementById('dropzoneArea').style.borderColor = "var(--accent-green)";
+            } else {
+                display.innerText = "";
+                document.getElementById('dropzoneArea').style.borderColor = "var(--border-color)";
+            }
+        };
+
+        // ================= FETCH ERP DEALERS =================
+        const dealerRef = doc(db, "app_settings", "dealers");
+        onSnapshot(dealerRef, (docSnap) => {
+            if (docSnap.exists() && docSnap.data().list) {
+                let dealersList = docSnap.data().list;
+                const sel = document.getElementById("erpDealerSelect");
+                sel.innerHTML = '<option value="" disabled selected>-- Select Target Dealer --</option>';
+                dealersList.sort().forEach(d => { 
+                    sel.innerHTML += `<option value="${d}">${d}</option>`; 
+                });
+            }
+        });
+
+        // ================= SMART DATE PARSER =================
+        function parseBankDate(val) {
+            if(!val) return null;
+            // Handle Excel internal date number
+            if(!isNaN(val) && typeof val === 'number') return new Date(Math.round((val - 25569) * 86400 * 1000));
+            // Handle Indian String Date (DD-MM-YYYY or DD/MM/YYYY)
+            let str = String(val).trim().split(' ')[0];
+            let parts = str.split(/[-/]/);
+            if(parts.length === 3) {
+                let d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
+                if(y < 100) y += 2000; // Handle '26' as '2026'
+                return new Date(y, m, d);
+            }
+            return new Date(val); // Fallback standard parser
+        }
+
+        let totalMatchedAmount = 0;
+        let matchedRecordsCount = 0;
+
+        // ================= CORE AI EXTRACTION ENGINE =================
+        window.analyzeStatement = function() {
+            const fileInput = document.getElementById('bankFile').files[0];
+            const keyword = document.getElementById('searchKeyword').value.trim().toLowerCase();
+            const colDate = parseInt(document.getElementById('colDate').value) - 1;
+            const colDesc = parseInt(document.getElementById('colDesc').value) - 1;
+            const colDebit = parseInt(document.getElementById('colDebit').value) - 1;
+            
+            const startStr = document.getElementById('startDate').value;
+            const endStr = document.getElementById('endDate').value;
+
+            if(!fileInput) { alert("⚠️ Please upload a CSV or Excel Bank Statement first!"); return; }
+            if(!keyword) { alert("⚠️ Please enter a Target Keyword (e.g. SAMSUNG)!"); return; }
+
+            let startDate = startStr ? new Date(startStr).setHours(0,0,0,0) : null;
+            let endDate = endStr ? new Date(endStr).setHours(23,59,59,999) : null;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonArr = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+                    
+                    totalMatchedAmount = 0; 
+                    matchedRecordsCount = 0;
+                    let tbody = document.getElementById('matchTableBody');
+                    tbody.innerHTML = '';
+
+                    for(let i = 0; i < jsonArr.length; i++) {
+                        let row = jsonArr[i];
+                        if(!row || row.length === 0) continue;
+
+                        let rawDate = row[colDate];
+                        let rawDesc = row[colDesc] ? String(row[colDesc]).toLowerCase() : "";
+                        let rawDebit = row[colDebit];
+
+                        if(rawDesc.includes(keyword)) {
+                            let parsedDate = parseBankDate(rawDate);
+                            let time = parsedDate ? parsedDate.getTime() : null;
+
+                            // Apply Date Filters
+                            if(startDate && time && time < startDate) continue;
+                            if(endDate && time && time > endDate) continue;
+
+                            // Clean & Parse Amount
+                            let amount = 0;
+                            if(rawDebit) {
+                                let cleanAmt = String(rawDebit).replace(/[^\d.-]/g, '');
+                                amount = parseFloat(cleanAmt);
+                            }
+
+                            if(amount > 0 && !isNaN(amount)) {
+                                totalMatchedAmount += amount;
+                                matchedRecordsCount++;
+                                let fDate = parsedDate ? parsedDate.toLocaleDateString('en-IN') : String(rawDate);
+                                
+                                tbody.innerHTML += `
+                                    <tr class="matched-row-ui">
+                                        <td style="white-space:nowrap;">${fDate}</td>
+                                        <td style="font-size:11px; opacity:0.9;">${String(row[colDesc]).substring(0, 45)}...</td>
+                                        <td style="text-align:right; font-weight:700; color:var(--accent-red); white-space:nowrap;">₹${amount.toLocaleString('en-IN')}</td>
+                                    </tr>
+                                `;
+                            }
+                        }
+                    }
+
+                    // Reveal Dashboard Result UI
+                    document.getElementById('resultSection').style.display = 'block';
+                    document.getElementById('totalFound').innerText = `₹${totalMatchedAmount.toLocaleString('en-IN')}`;
+                    document.getElementById('recordCountText').innerText = `Found ${matchedRecordsCount} matching transactions for "${keyword.toUpperCase()}"`;
+                    
+                    if(matchedRecordsCount === 0) {
+                        tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--text-muted);">No transactions matched this keyword and date range.</td></tr>`;
+                    }
+                    
+                    // Auto-scroll to results
+                    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                } catch(err) {
+                    alert("❌ Error reading the file. Make sure it's a valid Excel or CSV.");
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(fileInput);
+        };
+
+        // ================= SECURE ERP SYNC LOGIC =================
+        window.syncToKhata = async function() {
+            const dealer = document.getElementById('erpDealerSelect').value;
+            const keyword = document.getElementById('searchKeyword').value;
+            const startStr = document.getElementById('startDate').value;
+            const endStr = document.getElementById('endDate').value;
+
+            if(!dealer) { alert("⚠️ Select a Target Dealer from the dropdown to sync data!"); return; }
+            if(totalMatchedAmount <= 0) { alert("⚠️ Total amount is 0. Nothing to sync."); return; }
+
+            const btn = document.getElementById('btnSync');
+            btn.innerHTML = `<span style="font-size:18px;">🔄</span> Syncing to Secure Ledger...`;
+            btn.style.opacity = "0.7";
+            btn.style.pointerEvents = "none";
+
+            let dateRangeText = (startStr || "Beginning") + " to " + (endStr || "End");
+            let autoRemarks = `Auto-Synced from Bank (Ref: ${keyword.toUpperCase()} | Range: ${dateRangeText})`;
+
+            try {
+                // Write into original ERP collection
+                await addDoc(collection(db, "dealer_payments"), { 
+                    dealer: dealer, 
+                    date: new Date().toISOString().split('T')[0], // Sync Date (Today)
+                    amount: totalMatchedAmount, 
+                    mode: "Online (Auto-Bank)", 
+                    remarks: autoRemarks, 
+                    timestamp: Date.now() 
+                });
+                
+                alert(`✅ SUCCESS! ₹${totalMatchedAmount.toLocaleString('en-IN')} has been securely added to ${dealer}'s ERP Khata.`);
+                
+                // Soft Reset UI
+                document.getElementById('resultSection').style.display = 'none';
+                document.getElementById('bankFile').value = '';
+                document.getElementById('fileNameDisplay').innerText = '';
+                document.getElementById('dropzoneArea').style.borderColor = "var(--border-color)";
+                
+                btn.innerHTML = `<span style="font-size:18px;">☁️</span> Secure Sync to Ledger`;
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+
+            } catch (error) {
+                alert("❌ Sync Failed! Please check your internet connection.");
+                btn.innerHTML = `<span style="font-size:18px;">☁️</span> Secure Sync to Ledger`;
+                btn.style.opacity = "1";
+                btn.style.pointerEvents = "auto";
+            }
+        };
+    </script>
+</body>
+</html>
