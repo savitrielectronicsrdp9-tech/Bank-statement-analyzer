@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SBI Auto-Analyzer & PDF Generator</title>
+    <title>SBI Cloud Analyzer & Auto-Deduplicator</title>
     
+    <!-- SheetJS Library for Excel Parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { --sbi-blue: #0077CC; --sbi-light: #e6f2ff; --text-dark: #333; }
+        :root { --sbi-blue: #0077CC; --sbi-light: #e6f2ff; --text-dark: #333; --success: #28a745; --danger: #dc3545; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: var(--text-dark); }
         
-        .main-container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .header { text-align: center; margin-bottom: 25px; }
+        .main-container { max-width: 800px; margin: auto; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--sbi-blue); }
+        
+        .header { text-align: center; margin-bottom: 20px; }
         .header h2 { color: var(--sbi-blue); margin: 0; font-size: 24px; }
         
         .input-group { margin-bottom: 15px; }
@@ -20,13 +23,17 @@
         .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; }
         .input-group input:focus { border-color: var(--sbi-blue); }
         
-        .btn-run { width: 100%; background: var(--sbi-blue); color: white; border: none; padding: 14px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; box-shadow: 0 4px 10px rgba(0, 119, 204, 0.2); }
+        .btn-run { width: 100%; background: var(--sbi-blue); color: white; border: none; padding: 14px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-run:hover { background: #005fa3; }
+        .btn-success { background: var(--success); } .btn-success:hover { background: #218838; }
+        
+        /* Status Text */
+        #feedStatus { text-align: center; font-weight: bold; margin-top: 10px; font-size: 14px; }
         
         /* PDF / Print Report UI */
-        #printableReport { display: none; max-width: 800px; margin: 30px auto; border: 1px solid #ddd; padding: 30px; border-radius: 12px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        #printableReport { display: none; max-width: 800px; margin: 20px auto; border: 1px solid #ddd; padding: 30px; border-radius: 12px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .report-header { text-align: center; border-bottom: 3px solid var(--sbi-blue); padding-bottom: 15px; margin-bottom: 20px; }
-        .report-header h3 { margin: 0; color: var(--sbi-blue); font-size: 26px; text-transform: uppercase; letter-spacing: 1px; }
+        .report-header h3 { margin: 0; color: var(--sbi-blue); font-size: 26px; text-transform: uppercase; }
         .report-meta { display: flex; justify-content: space-between; font-size: 15px; color: #444; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px dashed #ccc; }
         
         table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 20px; }
@@ -35,12 +42,8 @@
         tr:nth-child(even) { background-color: #fafafa; }
         
         .summary-box { display: flex; justify-content: flex-end; gap: 30px; font-weight: bold; font-size: 18px; border-top: 2px solid #ddd; padding-top: 15px; }
-        .credit-text { color: #28a745; }
-        .debit-text { color: #dc3545; }
+        .credit-text { color: var(--success); } .debit-text { color: var(--danger); }
         
-        .btn-print { background: #28a745; color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; margin-top: 20px; display: inline-block; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.2); }
-        
-        /* CSS Trick to hide everything else and only print the Report */
         @media print {
             body { background: white; padding: 0; }
             .hide-on-print { display: none !important; }
@@ -52,42 +55,55 @@
 
 <div class="main-container hide-on-print">
     <div class="header">
-        <h2>🏦 SBI Statement Auto-Filter</h2>
-        <p style="color: gray; font-size: 13px; margin-top:5px;">Upload Excel -> Enter Name -> Get Clean PDF</p>
+        <h2>☁️ SBI Cloud Database & Analyzer</h2>
+        <p style="color: gray; font-size: 13px; margin-top:5px;">Feed data once, Search anytime, No duplicates!</p>
     </div>
     
-    <div class="input-group">
-        <label>1. Upload SBI Excel File (.xls, .xlsx, .csv)</label>
-        <input type="file" id="fileInput" accept=".csv, .xls, .xlsx">
-    </div>
-    
-    <div class="input-group">
-        <label>2. Account Name / Target Keyword</label>
-        <input type="text" id="keyword" placeholder="e.g. RAHUL KUMAR or UPI/RAMESH">
-    </div>
-    
-    <div style="display: flex; gap: 15px;">
-        <div class="input-group" style="flex: 1;">
-            <label>Start Date (Optional)</label>
-            <input type="date" id="startDate">
+    <!-- SECTION 1: FEED DATA -->
+    <div class="card" style="border-top-color: var(--success);">
+        <h3 style="margin-top:0; color: var(--success);">1. Feed Data to Software (One-Time)</h3>
+        <p style="font-size:13px; color:#666; margin-bottom:15px;">Upload your SBI Excel. Software will automatically ignore duplicates if uploaded again.</p>
+        
+        <div class="input-group">
+            <input type="file" id="fileInput" accept=".csv, .xls, .xlsx">
         </div>
-        <div class="input-group" style="flex: 1;">
-            <label>End Date (Optional)</label>
-            <input type="date" id="endDate">
-        </div>
+        <button class="btn-run btn-success" id="btnFeed" onclick="feedExcelToDatabase()">🗄️ Feed & Save to Database</button>
+        <div id="feedStatus"></div>
     </div>
-    
-    <button class="btn-run" onclick="processSBIExcel()">⚡ Generate Statement PDF</button>
+
+    <!-- SECTION 2: SEARCH & GENERATE -->
+    <div class="card">
+        <h3 style="margin-top:0; color: var(--sbi-blue);">2. Search & Generate Statement</h3>
+        
+        <div class="input-group">
+            <label>Search Keyword (Name, UTR, or Exact Amount)</label>
+            <input type="text" id="keyword" placeholder="e.g. RAHUL, UPI/123, or 5000">
+        </div>
+        
+        <div style="display: flex; gap: 15px;">
+            <div class="input-group" style="flex: 1;">
+                <label>Start Date (Optional)</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="input-group" style="flex: 1;">
+                <label>End Date (Optional)</label>
+                <input type="date" id="endDate">
+            </div>
+        </div>
+        
+        <button class="btn-run" id="btnSearch" onclick="searchFromDatabase()">🔍 Search & Create PDF</button>
+    </div>
 </div>
 
+<!-- SECTION 3: PDF REPORT -->
 <div id="printableReport">
     <div class="report-header">
-        <h3>Account Transaction Statement</h3>
-        <p style="margin:5px 0 0 0; font-size:14px; color:gray;">System Generated Smart Ledger</p>
+        <h3>Cloud Ledger Statement</h3>
+        <p style="margin:5px 0 0 0; font-size:14px; color:gray;">System Generated Auto-Matched Report</p>
     </div>
     
     <div class="report-meta">
-        <div><strong>👤 Searched Account:</strong> <span id="repKeyword" style="color:var(--sbi-blue); font-weight:bold;"></span></div>
+        <div><strong>🔍 Searched For:</strong> <span id="repKeyword" style="color:var(--sbi-blue); font-weight:bold;"></span></div>
         <div><strong>📅 Date Range:</strong> <span id="repDates" style="font-weight:bold;"></span></div>
     </div>
     
@@ -100,8 +116,7 @@
                 <th style="text-align: right; width: 17%;">Received (Credit)</th>
             </tr>
         </thead>
-        <tbody id="reportBody">
-            </tbody>
+        <tbody id="reportBody"></tbody>
     </table>
     
     <div class="summary-box">
@@ -109,13 +124,30 @@
         <div class="credit-text">Total Received: ₹<span id="totCredit">0</span></div>
     </div>
     
-    <div style="text-align: center;" class="hide-on-print">
-        <button class="btn-print" onclick="window.print()">🖨️ Save as PDF / Print Now</button>
+    <div style="text-align: center; margin-top:20px;" class="hide-on-print">
+        <button class="btn-run btn-success" style="width:auto; padding:10px 30px;" onclick="window.print()">🖨️ Print / Save as PDF</button>
     </div>
 </div>
 
-<script>
-    // Smart Date Parser (SBI ke ultay-seedhay date format ko handle karne ke liye)
+<!-- FIREBASE & LOGIC SCRIPT -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import { getFirestore, doc, writeBatch, collection, getDocs, query, orderBy } 
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    // Use your existing Savitri Job Bridge Database
+    const firebaseConfig = {
+        apiKey: "AIzaSyD3hc6Rz1gHZq8c71AHp5NSw8eSZT2-Mik",
+        authDomain: "savitri-job-bridge.firebaseapp.com",
+        projectId: "savitri-job-bridge",
+        storageBucket: "savitri-job-bridge.firebasestorage.app",
+        messagingSenderId: "721066136910",
+        appId: "1:721066136910:web:61b5d58b31d8ab481f7a1f"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     function parseBankDate(val) {
         if(!val) return null;
         if(!isNaN(val) && typeof val === 'number') return new Date(Math.round((val - 25569) * 86400 * 1000));
@@ -129,129 +161,181 @@
         return new Date(val); 
     }
 
-    function processSBIExcel() {
+    // ================= 1. FEED DATA TO CLOUD (With Duplicate Prevention) =================
+    window.feedExcelToDatabase = function() {
         const fileInput = document.getElementById('fileInput').files[0];
+        if(!fileInput) { alert("⚠️ Please select an Excel file first!"); return; }
+
+        const btn = document.getElementById('btnFeed');
+        const status = document.getElementById('feedStatus');
+        btn.innerText = "⏳ Processing Excel...";
+        btn.disabled = true;
+        status.style.color = "orange";
+        status.innerText = "Reading file and creating secure IDs...";
+
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const jsonArr = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], {header: 1});
+
+                let dCol = -1, descCol = -1, debCol = -1, credCol = -1, headerIndex = -1;
+                for(let i=0; i<Math.min(jsonArr.length, 30); i++) {
+                    let row = jsonArr[i]; if(!row) continue;
+                    for(let c=0; c<row.length; c++) {
+                        let val = String(row[c]).toLowerCase().trim();
+                        if(val.includes('txn date') || val === 'date' || val === 'value date') dCol = c;
+                        else if(val.includes('description') || val.includes('narration') || val.includes('particulars')) descCol = c;
+                        else if(val === 'debit') debCol = c; else if(val === 'credit') credCol = c;
+                    }
+                    if(descCol !== -1 && (debCol !== -1 || credCol !== -1)) { headerIndex = i; break; }
+                }
+
+                if(headerIndex === -1) throw new Error("Could not detect SBI columns.");
+
+                let batch = writeBatch(db);
+                let operationCount = 0;
+                let totalFound = 0;
+
+                for(let i = headerIndex + 1; i < jsonArr.length; i++) {
+                    let row = jsonArr[i];
+                    if(!row || !row[dCol] || !row[descCol]) continue; 
+
+                    let parsedDate = parseBankDate(row[dCol]);
+                    if(!parsedDate) continue;
+
+                    let debitAmt = parseFloat(String(row[debCol] || 0).replace(/[^\d.-]/g, '')) || 0;
+                    let creditAmt = parseFloat(String(row[credCol] || 0).replace(/[^\d.-]/g, '')) || 0;
+                    let cleanDesc = String(row[descCol]).trim();
+
+                    if(debitAmt > 0 || creditAmt > 0) {
+                        // SMART DEDUPLICATION: Creating a Unique Document ID for each transaction
+                        // Bank descriptions usually contain unique UTR numbers. Even if they don't, Date + Amount + Desc is 99.9% unique.
+                        let descHash = cleanDesc.replace(/[^a-zA-Z0-9]/g, '').substring(0, 40);
+                        let uniqueID = `${parsedDate.getTime()}_${debitAmt}_${creditAmt}_${descHash}`;
+
+                        let docRef = doc(db, "sbi_bank_records", uniqueID);
+                        
+                        // Set data (will overwrite safely if exact same ID exists - completely preventing duplicates)
+                        batch.set(docRef, {
+                            timestampMs: parsedDate.getTime(),
+                            dateStr: parsedDate.toLocaleDateString('en-IN'),
+                            narration: cleanDesc,
+                            searchableText: cleanDesc.toLowerCase(), // For easy searching
+                            debit: debitAmt,
+                            credit: creditAmt
+                        });
+
+                        totalFound++;
+                        operationCount++;
+
+                        // Firestore batch limit is 500, so we commit and create a new batch if we hit it
+                        if(operationCount === 490) {
+                            await batch.commit();
+                            batch = writeBatch(db);
+                            operationCount = 0;
+                        }
+                    }
+                }
+                
+                if(operationCount > 0) await batch.commit();
+
+                status.style.color = "green";
+                status.innerText = `✅ Success! ${totalFound} transactions checked & securely fed into database. Duplicates were ignored automatically.`;
+                document.getElementById('fileInput').value = '';
+
+            } catch(err) {
+                status.style.color = "red";
+                status.innerText = "❌ Error: " + err.message;
+            }
+            btn.innerText = "🗄️ Feed & Save to Database";
+            btn.disabled = false;
+        };
+        reader.readAsArrayBuffer(fileInput);
+    }
+
+    // ================= 2. SEARCH FROM CLOUD (Without needing Excel) =================
+    window.searchFromDatabase = async function() {
         const keyword = document.getElementById('keyword').value.trim().toLowerCase();
         const startStr = document.getElementById('startDate').value;
         const endStr = document.getElementById('endDate').value;
 
-        if(!fileInput) { alert("⚠️ Please upload the SBI Excel File."); return; }
-        if(!keyword) { alert("⚠️ Please enter the Account Name or Keyword."); return; }
+        if(!keyword) { alert("⚠️ Please enter a Name, UTR, or Amount to search."); return; }
 
+        const btn = document.getElementById('btnSearch');
+        btn.innerText = "🔍 Searching Database...";
+        
         let startDate = startStr ? new Date(startStr).setHours(0,0,0,0) : null;
         let endDate = endStr ? new Date(endStr).setHours(23,59,59,999) : null;
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-                const jsonArr = XLSX.utils.sheet_to_json(worksheet, {header: 1});
+        // Check if user entered a number (amount) or text (name)
+        let isAmountSearch = !isNaN(parseFloat(keyword)) && isFinite(keyword);
+        let searchAmount = isAmountSearch ? parseFloat(keyword) : 0;
 
-                // 1. SBI Columns Auto-Detector
-                let dCol = -1, descCol = -1, debCol = -1, credCol = -1, headerIndex = -1;
+        try {
+            // Get all records from database (Ordered by Date)
+            const q = query(collection(db, "sbi_bank_records"), orderBy("timestampMs", "asc"));
+            const querySnapshot = await getDocs(q);
+
+            let tbody = document.getElementById('reportBody');
+            tbody.innerHTML = '';
+            let totalDebit = 0, totalCredit = 0;
+            let matchCount = 0;
+
+            querySnapshot.forEach((doc) => {
+                let data = doc.data();
                 
-                for(let i=0; i<Math.min(jsonArr.length, 30); i++) {
-                    let row = jsonArr[i];
-                    if(!row || row.length === 0) continue;
+                // Date Filter Check
+                if(startDate && data.timestampMs < startDate) return;
+                if(endDate && data.timestampMs > endDate) return;
+
+                let isMatch = false;
+                if(isAmountSearch) {
+                    if(data.debit === searchAmount || data.credit === searchAmount) isMatch = true;
+                } else {
+                    if(data.searchableText.includes(keyword)) isMatch = true;
+                }
+
+                if(isMatch) {
+                    totalDebit += data.debit;
+                    totalCredit += data.credit;
+                    matchCount++;
                     
-                    for(let c=0; c<row.length; c++) {
-                        if(!row[c]) continue;
-                        let val = String(row[c]).toLowerCase().trim();
-                        
-                        if(val.includes('txn date') || val === 'date' || val === 'value date') dCol = c;
-                        else if(val.includes('description') || val.includes('narration') || val.includes('particulars')) descCol = c;
-                        else if(val === 'debit') debCol = c;
-                        else if(val === 'credit') credCol = c;
-                    }
-                    
-                    // Agar Description aur koi ek Amount column mil gaya, matlab table shuru ho gayi
-                    if(descCol !== -1 && (debCol !== -1 || credCol !== -1)) {
-                        headerIndex = i;
-                        break;
-                    }
+                    tbody.innerHTML += `
+                        <tr>
+                            <td style="white-space:nowrap; font-weight:500;">${data.dateStr}</td>
+                            <td style="color:#555;">${data.narration}</td>
+                            <td style="text-align: right; color: var(--danger); font-weight:600;">${data.debit > 0 ? '₹'+data.debit.toLocaleString('en-IN') : '-'}</td>
+                            <td style="text-align: right; color: var(--success); font-weight:600;">${data.credit > 0 ? '₹'+data.credit.toLocaleString('en-IN') : '-'}</td>
+                        </tr>
+                    `;
                 }
+            });
 
-                if(headerIndex === -1) {
-                    alert("❌ Error: Could not detect correct columns. Please make sure this is an SBI Statement.");
-                    return;
-                }
-
-                let tbody = document.getElementById('reportBody');
-                tbody.innerHTML = '';
-                let totalDebit = 0, totalCredit = 0;
-                let count = 0;
-
-                // 2. Data Filtering and Extraction
-                for(let i = headerIndex + 1; i < jsonArr.length; i++) {
-                    let row = jsonArr[i];
-                    if(!row || row.length === 0 || !row[dCol]) continue; 
-
-                    let rawDesc = row[descCol] ? String(row[descCol]).toLowerCase() : "";
-                    
-                    // Agar naam match karta hai
-                    if(rawDesc.includes(keyword)) {
-                        let parsedDate = parseBankDate(row[dCol]);
-                        let time = parsedDate ? parsedDate.getTime() : null;
-
-                        // Date check
-                        if(startDate && time && time < startDate) continue;
-                        if(endDate && time && time > endDate) continue;
-
-                        let debitAmt = parseFloat(String(row[debCol] || 0).replace(/[^\d.-]/g, '')) || 0;
-                        let creditAmt = parseFloat(String(row[credCol] || 0).replace(/[^\d.-]/g, '')) || 0;
-
-                        if(debitAmt > 0 || creditAmt > 0) {
-                            totalDebit += debitAmt;
-                            totalCredit += creditAmt;
-                            count++;
-
-                            let fDate = parsedDate ? parsedDate.toLocaleDateString('en-IN') : String(row[dCol]);
-                            let cleanDesc = String(row[descCol]);
-                            
-                            tbody.innerHTML += `
-                                <tr>
-                                    <td style="white-space:nowrap; font-weight:500;">${fDate}</td>
-                                    <td style="color:#555;">${cleanDesc}</td>
-                                    <td style="text-align: right; color: #dc3545; font-weight:600;">${debitAmt > 0 ? '₹'+debitAmt.toLocaleString('en-IN') : '-'}</td>
-                                    <td style="text-align: right; color: #28a745; font-weight:600;">${creditAmt > 0 ? '₹'+creditAmt.toLocaleString('en-IN') : '-'}</td>
-                                </tr>
-                            `;
-                        }
-                    }
-                }
-
-                if(count === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:gray;">No transactions found for "${keyword.toUpperCase()}" in this period.</td></tr>`;
-                }
-
-                // 3. UI Update for PDF Rendering
-                document.getElementById('repKeyword').innerText = keyword.toUpperCase();
-                
-                let rangeText = "All Time";
-                if(startStr || endStr) {
-                    rangeText = (startStr ? new Date(startStr).toLocaleDateString('en-IN') : 'Start') + " to " + 
-                                (endStr ? new Date(endStr).toLocaleDateString('en-IN') : 'End');
-                }
-                document.getElementById('repDates').innerText = rangeText;
-                
-                document.getElementById('totDebit').innerText = totalDebit.toLocaleString('en-IN');
-                document.getElementById('totCredit').innerText = totalCredit.toLocaleString('en-IN');
-
-                // Display the printable report on screen
-                let reportDiv = document.getElementById('printableReport');
-                reportDiv.style.display = 'block';
-                
-                // Scroll page down smoothly to the report
-                reportDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            } catch(e) {
-                alert("❌ Error processing Excel file. Make sure it is not corrupted.");
-                console.error(e);
+            if(matchCount === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:gray;">No records found in database for "${keyword.toUpperCase()}". Did you feed the data?</td></tr>`;
             }
-        };
-        reader.readAsArrayBuffer(fileInput);
+
+            // Update UI
+            document.getElementById('repKeyword').innerText = keyword.toUpperCase();
+            let rangeText = "All Time";
+            if(startStr || endStr) {
+                rangeText = (startStr ? new Date(startStr).toLocaleDateString('en-IN') : 'Start') + " to " + 
+                            (endStr ? new Date(endStr).toLocaleDateString('en-IN') : 'End');
+            }
+            document.getElementById('repDates').innerText = rangeText;
+            document.getElementById('totDebit').innerText = totalDebit.toLocaleString('en-IN');
+            document.getElementById('totCredit').innerText = totalCredit.toLocaleString('en-IN');
+
+            document.getElementById('printableReport').style.display = 'block';
+            document.getElementById('printableReport').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        } catch (error) {
+            alert("❌ Database Error. Check connection.");
+            console.error(error);
+        }
+        btn.innerText = "🔍 Search & Create PDF";
     }
 </script>
 </body>
