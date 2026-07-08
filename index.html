@@ -2,49 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SBI Cloud Analyzer - Pro Version</title>
+    <!-- Compact Viewport for Desktop-like density on Mobile -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SBI Cloud Analyzer - Compact Pro</title>
     
     <!-- SheetJS Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
-        :root { --sbi-blue: #0077CC; --sbi-light: #e6f2ff; --text-dark: #333; --success: #28a745; --danger: #dc3545; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; margin: 0; padding: 20px; color: var(--text-dark); }
+        :root { --sbi-blue: #005fa3; --sbi-light: #e6f2ff; --text-dark: #222; --success: #1e7e34; --danger: #bd2130; }
         
-        .main-container { max-width: 800px; margin: auto; }
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid var(--sbi-blue); }
+        /* Ultra-Compact Base Font for Desktop Feel */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #eaeff2; margin: 0; padding: 10px; color: var(--text-dark); font-size: 12px; }
         
-        .header { text-align: center; margin-bottom: 20px; }
-        .header h2 { color: var(--sbi-blue); margin: 0; font-size: 24px; }
+        .main-container { max-width: 100%; margin: auto; }
         
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 14px; color: #555; }
-        .input-group input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: 0.2s; }
-        .input-group input:focus { border-color: var(--sbi-blue); box-shadow: 0 0 5px rgba(0,119,204,0.3); }
+        /* Compact Cards */
+        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 12px; border-top: 3px solid var(--sbi-blue); }
         
-        .btn-run { width: 100%; background: var(--sbi-blue); color: white; border: none; padding: 14px; font-size: 16px; border-radius: 8px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; }
-        .btn-run:hover { background: #005fa3; }
-        .btn-success { background: var(--success); } .btn-success:hover { background: #218838; }
+        .header { text-align: center; margin-bottom: 12px; }
+        .header h2 { color: var(--sbi-blue); margin: 0; font-size: 18px; text-transform: uppercase; }
         
-        #feedStatus { text-align: center; font-weight: bold; margin-top: 10px; font-size: 14px; }
+        /* Compact Inputs */
+        .input-group { margin-bottom: 10px; }
+        .input-group label { display: block; font-weight: 600; margin-bottom: 4px; font-size: 11px; color: #555; }
+        .input-group input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 12px; outline: none; transition: 0.2s; }
+        .input-group input:focus { border-color: var(--sbi-blue); box-shadow: 0 0 4px rgba(0,119,204,0.3); }
+        
+        /* Side-by-side flex for Mobile */
+        .row-flex { display: flex; gap: 10px; }
+        .row-flex .input-group { flex: 1; }
+        
+        /* Compact Buttons */
+        .btn-run { width: 100%; background: var(--sbi-blue); color: white; border: none; padding: 10px; font-size: 13px; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 4px; transition: 0.2s; }
+        .btn-run:hover { background: #004080; }
+        .btn-success { background: var(--success); } .btn-success:hover { background: #155d27; }
+        
+        #feedStatus { text-align: center; font-weight: bold; margin-top: 8px; font-size: 11px; }
         
         /* PDF / Print Report UI */
-        #printableReport { display: none; max-width: 850px; margin: 20px auto; border: 1px solid #ddd; padding: 30px; border-radius: 12px; background: white; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .report-header { text-align: center; border-bottom: 3px solid var(--sbi-blue); padding-bottom: 15px; margin-bottom: 20px; }
-        .report-header h3 { margin: 0; color: var(--sbi-blue); font-size: 26px; text-transform: uppercase; }
-        .report-meta { display: flex; justify-content: space-between; font-size: 14px; color: #444; margin-bottom: 20px; background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px dashed #ccc; }
+        #printableReport { display: none; margin: 15px auto; border: 1px solid #ddd; padding: 15px; border-radius: 8px; background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .report-header { text-align: center; border-bottom: 2px solid var(--sbi-blue); padding-bottom: 8px; margin-bottom: 12px; }
+        .report-header h3 { margin: 0; color: var(--sbi-blue); font-size: 18px; text-transform: uppercase; }
         
-        table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }
-        th, td { border: 1px solid #eee; padding: 10px; text-align: left; }
-        th { background-color: var(--sbi-light); color: var(--sbi-blue); font-weight: 600; text-transform: uppercase; }
+        .report-meta { display: flex; flex-direction: column; gap: 4px; font-size: 11px; color: #444; margin-bottom: 12px; background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px dashed #ccc; }
+        @media (min-width: 500px) { .report-meta { flex-direction: row; justify-content: space-between; } }
+        
+        /* Dense Data Table */
+        .table-wrapper { overflow-x: auto; margin-bottom: 15px; border: 1px solid #eee; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; min-width: 400px; }
+        th, td { border-bottom: 1px solid #eee; padding: 6px 8px; text-align: left; }
+        th { background-color: var(--sbi-light); color: var(--sbi-blue); font-weight: 700; text-transform: uppercase; font-size: 10px; position: sticky; top: 0; }
         tr:nth-child(even) { background-color: #fafafa; }
-        tr:hover { background-color: #f1f8ff; } /* Highlight on hover */
         
-        .btn-remove { background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 12px; font-weight: bold; transition: 0.2s; }
-        .btn-remove:hover { background: var(--danger); color: white; }
-
-        .summary-box { display: flex; justify-content: flex-end; gap: 30px; font-weight: bold; font-size: 18px; border-top: 2px solid #ddd; padding-top: 15px; }
+        .btn-remove { background: #ffebee; color: var(--danger); border: 1px solid #ffcdd2; border-radius: 4px; padding: 3px 6px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        
+        /* Compact Summary Box */
+        .summary-box { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; font-weight: 700; font-size: 13px; border-top: 2px solid #ddd; padding-top: 10px; background: #fdfdfd; }
+        .summary-item { padding: 6px 10px; border-radius: 4px; border: 1px solid #eee; background: white; }
         .credit-text { color: var(--success); } .debit-text { color: var(--danger); }
         
         @media print {
@@ -58,76 +73,81 @@
 
 <div class="main-container hide-on-print">
     <div class="header">
-        <h2>☁️ Cloud Ledger Engine v3.0</h2>
-        <p style="color: gray; font-size: 13px; margin-top:5px;">Multi-Search, Auto-Calculate & View All Features Enabled</p>
+        <h2>📊 Cloud Ledger Hub</h2>
     </div>
     
     <!-- SECTION 1: FEED DATA -->
     <div class="card" style="border-top-color: var(--success);">
-        <h3 style="margin-top:0; color: var(--success);">1. Feed Data to Cloud (Auto Duplicate Check)</h3>
-        <div class="input-group">
-            <input type="file" id="fileInput" accept=".csv, .xls, .xlsx">
+        <h3 style="margin:0 0 10px 0; color: var(--success); font-size:14px;">1. Feed Bank Data</h3>
+        <div class="row-flex" style="align-items: center;">
+            <div class="input-group" style="flex: 2; margin: 0;">
+                <input type="file" id="fileInput" accept=".csv, .xls, .xlsx" style="padding: 6px;">
+            </div>
+            <div style="flex: 1;">
+                <button class="btn-run btn-success" id="btnFeed" onclick="feedExcelToDatabase()" style="margin: 0;">☁️ Sync</button>
+            </div>
         </div>
-        <button class="btn-run btn-success" id="btnFeed" onclick="feedExcelToDatabase()">🗄️ Secure Upload & Sync</button>
         <div id="feedStatus"></div>
     </div>
 
     <!-- SECTION 2: SEARCH & GENERATE -->
     <div class="card">
-        <h3 style="margin-top:0; color: var(--sbi-blue);">2. Smart Filter & Generate</h3>
+        <h3 style="margin:0 0 10px 0; color: var(--sbi-blue); font-size:14px;">2. Search & Generate Filter</h3>
         
         <div class="input-group">
-            <label>Search Keyword (Use comma ',' for multiple names. Leave Blank to VIEW ALL)</label>
-            <input type="text" id="keyword" placeholder="e.g. SAMSUNG, LG, 5000 (Leave blank for full statement)">
+            <label>Search Keyword (Leave Blank for ALL Transactions)</label>
+            <input type="text" id="keyword" placeholder="e.g. SAMSUNG, 5000 (Blank = Full Statement)">
         </div>
         
-        <div style="display: flex; gap: 15px;">
-            <div class="input-group" style="flex: 1;">
+        <div class="row-flex">
+            <div class="input-group">
                 <label>Start Date</label>
                 <input type="date" id="startDate">
             </div>
-            <div class="input-group" style="flex: 1;">
+            <div class="input-group">
                 <label>End Date</label>
                 <input type="date" id="endDate">
             </div>
         </div>
         
-        <button class="btn-run" id="btnSearch" onclick="searchFromDatabase()">🔍 Run Analysis & Create Report</button>
+        <button class="btn-run" id="btnSearch" onclick="searchFromDatabase()">🔍 Get Statement</button>
     </div>
 </div>
 
 <!-- SECTION 3: PDF REPORT -->
 <div id="printableReport">
     <div class="report-header">
-        <h3>Cloud Ledger Statement</h3>
-        <p style="margin:5px 0 0 0; font-size:14px; color:gray;">System Generated Smart Report</p>
+        <h3>Statement of Accounts</h3>
     </div>
     
     <div class="report-meta">
-        <div><strong>🔍 Filter Used:</strong> <span id="repKeyword" style="color:var(--sbi-blue); font-weight:bold;"></span></div>
-        <div><strong>📅 Date Range:</strong> <span id="repDates" style="font-weight:bold;"></span></div>
+        <div><strong>Filter:</strong> <span id="repKeyword" style="color:var(--sbi-blue); font-weight:bold;"></span></div>
+        <div><strong>Period:</strong> <span id="repDates" style="font-weight:bold;"></span></div>
     </div>
     
-    <table id="reportTable">
-        <thead>
-            <tr>
-                <th style="width: 12%;">Date</th>
-                <th style="width: 48%;">Transaction Details</th>
-                <th style="text-align: right; width: 15%;">Debit (Out)</th>
-                <th style="text-align: right; width: 15%;">Credit (In)</th>
-                <th class="hide-on-print" style="text-align: center; width: 10%;">Edit</th>
-            </tr>
-        </thead>
-        <tbody id="reportBody"></tbody>
-    </table>
+    <div class="table-wrapper">
+        <table id="reportTable">
+            <thead>
+                <tr>
+                    <th style="width: 10%; white-space: nowrap;">Date</th>
+                    <th style="width: 55%;">Narration</th>
+                    <th style="text-align: right; width: 12%;">Debit</th>
+                    <th style="text-align: right; width: 12%;">Credit</th>
+                    <th class="hide-on-print" style="text-align: center; width: 8%;">Act</th>
+                </tr>
+            </thead>
+            <tbody id="reportBody"></tbody>
+        </table>
+    </div>
     
     <div class="summary-box">
-        <div class="debit-text">Total Debit: ₹<span id="totDebit">0</span></div>
-        <div class="credit-text">Total Credit: ₹<span id="totCredit">0</span></div>
+        <div class="summary-item" style="color:#005fa3;">Total Txns: <span id="totTxns">0</span></div>
+        <div class="summary-item debit-text">Debit (Out): ₹<span id="totDebit">0</span></div>
+        <div class="summary-item credit-text">Credit (In): ₹<span id="totCredit">0</span></div>
     </div>
     
-    <div style="text-align: center; margin-top:20px;" class="hide-on-print">
-        <button class="btn-run btn-success" style="width:auto; padding:12px 40px; font-size:18px;" onclick="window.print()">🖨️ Print & Save PDF</button>
+    <div style="text-align: center; margin-top:15px;" class="hide-on-print">
+        <button class="btn-run btn-success" style="width:auto; padding:8px 25px;" onclick="window.print()">🖨️ Save PDF</button>
     </div>
 </div>
 
@@ -150,6 +170,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Date Parser
     function parseBankDate(val) {
         if(!val) return null;
         if(!isNaN(val) && typeof val === 'number') return new Date(Math.round((val - 25569) * 86400 * 1000));
@@ -166,14 +187,12 @@
     // ================= 1. FEED DATA =================
     window.feedExcelToDatabase = function() {
         const fileInput = document.getElementById('fileInput').files[0];
-        if(!fileInput) { alert("⚠️ Please select an Excel file first!"); return; }
+        if(!fileInput) { alert("⚠️ Select Excel file!"); return; }
 
         const btn = document.getElementById('btnFeed');
         const status = document.getElementById('feedStatus');
-        btn.innerText = "⏳ Processing Excel...";
-        btn.disabled = true;
-        status.style.color = "orange";
-        status.innerText = "Reading file and safely merging...";
+        btn.innerText = "⏳ Syncing..."; btn.disabled = true;
+        status.style.color = "orange"; status.innerText = "Reading data...";
 
         const reader = new FileReader();
         reader.onload = async function(e) {
@@ -194,11 +213,10 @@
                     if(descCol !== -1 && (debCol !== -1 || credCol !== -1)) { headerIndex = i; break; }
                 }
 
-                if(headerIndex === -1) throw new Error("Could not detect SBI columns.");
+                if(headerIndex === -1) throw new Error("Format error. Columns not found.");
 
                 let batch = writeBatch(db);
-                let operationCount = 0;
-                let totalFound = 0;
+                let operationCount = 0, totalFound = 0;
 
                 for(let i = headerIndex + 1; i < jsonArr.length; i++) {
                     let row = jsonArr[i];
@@ -225,44 +243,30 @@
                             credit: creditAmt
                         });
 
-                        totalFound++;
-                        operationCount++;
+                        totalFound++; operationCount++;
 
-                        if(operationCount === 490) {
-                            await batch.commit();
-                            batch = writeBatch(db);
-                            operationCount = 0;
-                        }
+                        if(operationCount === 490) { await batch.commit(); batch = writeBatch(db); operationCount = 0; }
                     }
                 }
                 
                 if(operationCount > 0) await batch.commit();
-
-                status.style.color = "green";
-                status.innerText = `✅ Success! ${totalFound} transactions checked & merged. Duplicates ignored.`;
+                status.style.color = "green"; status.innerText = `✅ Fed ${totalFound} txns.`;
                 document.getElementById('fileInput').value = '';
 
-            } catch(err) {
-                status.style.color = "red";
-                status.innerText = "❌ Error: " + err.message;
-            }
-            btn.innerText = "🗄️ Secure Upload & Sync";
-            btn.disabled = false;
+            } catch(err) { status.style.color = "red"; status.innerText = "❌ " + err.message; }
+            btn.innerText = "☁️ Sync"; btn.disabled = false;
         };
         reader.readAsArrayBuffer(fileInput);
     }
 
-    // ================= 2. SEARCH & VIEW ALL (With Multi-Search) =================
+    // ================= 2. SEARCH & VIEW ALL =================
     window.searchFromDatabase = async function() {
         const rawKeyword = document.getElementById('keyword').value.trim().toLowerCase();
         const startStr = document.getElementById('startDate').value;
         const endStr = document.getElementById('endDate').value;
         
-        // Multi-search logic (Split by comma)
         let keywords = rawKeyword ? rawKeyword.split(',').map(k => k.trim()).filter(k => k) : [];
-
-        const btn = document.getElementById('btnSearch');
-        btn.innerText = "🔍 Fetching Data...";
+        const btn = document.getElementById('btnSearch'); btn.innerText = "⏳ Loading...";
         
         let startDate = startStr ? new Date(startStr).setHours(0,0,0,0) : null;
         let endDate = endStr ? new Date(endStr).setHours(23,59,59,999) : null;
@@ -271,25 +275,18 @@
             const q = query(collection(db, "sbi_bank_records"), orderBy("timestampMs", "asc"));
             const querySnapshot = await getDocs(q);
 
-            let tbody = document.getElementById('reportBody');
-            tbody.innerHTML = '';
-            let totalDebit = 0, totalCredit = 0;
-            let matchCount = 0;
+            let tbody = document.getElementById('reportBody'); tbody.innerHTML = '';
+            let totalDebit = 0, totalCredit = 0, matchCount = 0;
 
             querySnapshot.forEach((doc) => {
                 let data = doc.data();
-                
-                // Date Filter
                 if(startDate && data.timestampMs < startDate) return;
                 if(endDate && data.timestampMs > endDate) return;
 
                 let isMatch = false;
-                
-                // If keywords is empty, it means VIEW ALL
                 if(keywords.length === 0) {
-                    isMatch = true; 
+                    isMatch = true; // VIEW ALL FLAG
                 } else {
-                    // Check if ANY of the comma-separated keywords match
                     for(let kw of keywords) {
                         let isAmountSearch = !isNaN(parseFloat(kw)) && isFinite(kw);
                         if(isAmountSearch) {
@@ -301,75 +298,55 @@
                 }
 
                 if(isMatch) {
-                    totalDebit += data.debit;
-                    totalCredit += data.credit;
-                    matchCount++;
+                    totalDebit += data.debit; totalCredit += data.credit; matchCount++;
                     
-                    // Added 'data-debit' and 'data-credit' for dynamic calculation later
                     tbody.innerHTML += `
                         <tr class="report-row" data-debit="${data.debit}" data-credit="${data.credit}">
-                            <td style="white-space:nowrap; font-weight:500;">${data.dateStr}</td>
-                            <td style="color:#555;">${data.narration}</td>
-                            <td style="text-align: right; color: var(--danger); font-weight:600;">${data.debit > 0 ? '₹'+data.debit.toLocaleString('en-IN') : '-'}</td>
-                            <td style="text-align: right; color: var(--success); font-weight:600;">${data.credit > 0 ? '₹'+data.credit.toLocaleString('en-IN') : '-'}</td>
+                            <td style="white-space:nowrap; font-weight:600;">${data.dateStr}</td>
+                            <td style="color:#444; line-height:1.2;">${data.narration}</td>
+                            <td style="text-align: right; color: var(--danger); font-weight:700; white-space:nowrap;">${data.debit > 0 ? '₹'+data.debit.toLocaleString('en-IN') : '-'}</td>
+                            <td style="text-align: right; color: var(--success); font-weight:700; white-space:nowrap;">${data.credit > 0 ? '₹'+data.credit.toLocaleString('en-IN') : '-'}</td>
                             <td class="hide-on-print" style="text-align: center;">
-                                <button class="btn-remove" onclick="removeRow(this)" title="Remove from this report">❌ Remove</button>
+                                <button class="btn-remove" onclick="removeRow(this)">❌</button>
                             </td>
                         </tr>
                     `;
                 }
             });
 
-            if(matchCount === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:gray;">No records found. Adjust dates or feed more data.</td></tr>`;
-            }
+            if(matchCount === 0) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:gray;">No records found.</td></tr>`;
 
-            // Update UI Details
-            document.getElementById('repKeyword').innerText = keywords.length === 0 ? "ALL TRANSACTIONS (View All)" : keywords.join(" OR ").toUpperCase();
+            document.getElementById('repKeyword').innerText = keywords.length === 0 ? "ALL TRANSACTIONS" : keywords.join(", ").toUpperCase();
+            document.getElementById('repDates').innerText = (startStr || endStr) ? 
+                `${startStr ? new Date(startStr).toLocaleDateString('en-IN') : 'Start'} to ${endStr ? new Date(endStr).toLocaleDateString('en-IN') : 'End'}` : "All Time";
             
-            let rangeText = "All Time";
-            if(startStr || endStr) {
-                rangeText = (startStr ? new Date(startStr).toLocaleDateString('en-IN') : 'Beginning') + " to " + 
-                            (endStr ? new Date(endStr).toLocaleDateString('en-IN') : 'End');
-            }
-            document.getElementById('repDates').innerText = rangeText;
-            
-            // Set initial totals
-            updateTotalsUI(totalDebit, totalCredit);
+            updateTotalsUI(matchCount, totalDebit, totalCredit);
 
             document.getElementById('printableReport').style.display = 'block';
             document.getElementById('printableReport').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-        } catch (error) {
-            alert("❌ Database Error. Check connection.");
-            console.error(error);
-        }
-        btn.innerText = "🔍 Run Analysis & Create Report";
+        } catch (error) { alert("❌ Database Error."); console.error(error); }
+        btn.innerText = "🔍 Get Statement";
     }
 
-    // ================= 3. EDITABLE ROWS (Dynamic Recalculation) =================
-    window.removeRow = function(buttonElement) {
-        // Remove the row from the table (UI only, safe from Database)
-        let row = buttonElement.closest('tr');
-        row.remove();
-
-        // Recalculate totals
-        let newTotalDebit = 0;
-        let newTotalCredit = 0;
+    // ================= 3. EDITABLE ROWS =================
+    window.removeRow = function(btnElement) {
+        btnElement.closest('tr').remove();
+        let newTotalDebit = 0, newTotalCredit = 0, newTxnCount = 0;
         
         document.querySelectorAll('.report-row').forEach(tr => {
             newTotalDebit += parseFloat(tr.getAttribute('data-debit')) || 0;
             newTotalCredit += parseFloat(tr.getAttribute('data-credit')) || 0;
+            newTxnCount++;
         });
-
-        updateTotalsUI(newTotalDebit, newTotalCredit);
+        updateTotalsUI(newTxnCount, newTotalDebit, newTotalCredit);
     }
 
-    function updateTotalsUI(debit, credit) {
+    function updateTotalsUI(count, debit, credit) {
+        document.getElementById('totTxns').innerText = count;
         document.getElementById('totDebit').innerText = debit.toLocaleString('en-IN');
         document.getElementById('totCredit').innerText = credit.toLocaleString('en-IN');
     }
-
 </script>
 </body>
 </html>
